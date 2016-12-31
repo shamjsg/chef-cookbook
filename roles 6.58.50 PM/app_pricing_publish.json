@@ -1,0 +1,138 @@
+{
+  "name": "app_pricing_publish",
+  "description": "Pricing Publish",
+  "json_class": "Chef::Role",
+  "default_attributes": {
+    "mw_app_name": "pricing-publish",
+    "zdd": {
+      "tomcatA": "Dark"
+    },
+    "java": {
+      "jdk_version": 7
+    },
+    "mq": {
+        "repository": "WDWBASHR1",
+        "cluster": "WDWEAIU",
+        "certificate": ""
+        },
+    "wdprt_tomcat_base": {
+      "tomcatA_major_version": "8",
+      "tomcatA_version": "8.0.22",
+      "tomcatB_major_version": "8",
+      "tomcatB_version": "8.0.22"
+      },
+    "applications": {
+      "pricing-view": {
+        "nexus_group": "com.wdpr.productservices.pricing",
+        "war_name": "pricing-view.war",
+        "friendly_name": "Pricing View",
+        "artifact_type": "war",
+        "version": "RELEASE",
+        "user": "tomcat",
+        "group": "tomcat",
+        "dev_contact": "roberto.e.garcia@disney.com",
+        "test_uri": "http://servername:x081/pricing-view/mvc/login",
+        "se_contact": "james.carter@disney.com",
+	       "externaljars": [
+          "pricing-publish"
+        ],
+        "extralibs": [
+         "https://nexus.disney.com/nexus/service/local/repositories/wdpro-artifactory-development/content/com/oracle/ojdbc6/11.1.0.7.0/ojdbc6-11.1.0.7.0.jar"
+       ]
+      },
+      "pricing-content-view": {
+        "nexus_group": "com.wdpr.productservices.pricing",
+        "war_name": "pricing-content-view.war",
+        "friendly_name": "Pricing Content-View",
+        "artifact_type": "war",
+        "version": "RELEASE",
+        "user": "tomcat",
+        "group": "tomcat",
+        "dev_contact": "roberto.e.garcia@disney.com",
+        "test_uri": "http://servername:x081/pricing-content-view/",
+        "se_contact": "james.carter@disney.com",
+         "externaljars": [
+          "pricing-publish"
+          ],
+          "extralibs": [
+           ""
+         ]
+      },
+      "pricing-admin": {
+        "nexus_group": "com.wdpr.productservices.pricing",
+        "war_name": "pricing-admin.war",
+        "friendly_name": "Pricing Admin",
+        "artifact_type": "war",
+        "version": "RELEASE",
+        "user": "tomcat",
+        "group": "tomcat",
+        "dev_contact": "roberto.e.garcia@disney.com",
+        "test_uri": "http://servername:x081/pricing-admin/",
+        "se_contact": "james.carter@disney.com",
+         "externaljars": [
+          "pricing-publish"
+          ],
+          "extralibs": [
+           ""
+         ]
+      }
+    },
+      "jndi_servers": {
+        "dev": {
+          "server1": "servername1",
+          "server2": "servername2",
+          "server3": "servername3",
+          "server4": "servername4"
+          },
+        "latest": {
+          "server1": "FLDCVDSLA0196",
+          "server2": "FLDCVDSLA1694",
+          "server3": "FLDCVDSLA8508",
+          "server4": "FLDCVFSLA0246"
+          },
+        "stage": {
+          "server1": "servername1",
+          "server2": "servername2",
+          "server3": "servername3",
+          "server4": "servername4"
+          },
+        "perf": {
+          "server1": "servername1",
+          "server2": "servername2",
+          "server3": "servername3",
+          "server4": "servername4"
+          },
+        "shadow": {
+          "server1": "servername1",
+          "server2": "servername2",
+          "server3": "servername3",
+          "server4": "servername4"
+          },
+        "release": {
+          "server1": "servername1",
+          "server2": "servername2",
+          "server3": "servername3",
+          "server4": "servername4"
+          }
+    }
+  },
+  "override_attributes": {
+
+  },
+  "chef_type": "role",
+  "run_list": [
+    "role[middleware_setup]",
+    "recipe[wdprt_yum_repos]",
+    "recipe[wdprt_yum_repos::dcs_epel]",
+    "recipe[wdprt_middleware_java]",
+    "recipe[wdprt_tomcat_base]",
+    "recipe[wdprt_tomcat_base::small]",
+    "role[mq_base]",
+    "recipe[app_pricing_publish::app_pricing_mq]",
+    "recipe[app_pricing_publish]",
+    "recipe[wdprt_se_info]"
+  ],
+  "env_run_lists": {
+
+  }
+}

@@ -1,0 +1,21 @@
+#!/bin/sh
+#==========================================================
+# Monitoring Config file
+# Includes only settings for monitoring tool
+# Ex: wily, appdynamics, etc
+# You can use ${JVM_NAME} for ex: tomcatA
+#==========================================================
+if [[ "${ENV_NAME}" != "" ]] && [[ "${APP_NAME}" != "" ]] && [[ "${SUB_APP_NAME}" != "" ]]; then
+  AGENT_NAME="${ENV_NAME}_${APP_NAME}_${SUB_APP_NAME}_${HOSTNAME}_${JVM_NAME}"
+  PROFILE_NAME="WDPR_${ENV_NAME}_${APP_NAME}_${SUB_APP_NAME}_IntroscopeAgent.profile"
+  MON_HOME="/opt/apps/wily/tomcat"
+
+  MON_OPTS=""
+  MON_OPTS="${MON_OPTS} -javaagent:${MON_HOME}/Agent.jar"
+  MON_OPTS="${MON_OPTS} -XX:-UseSplitVerifier"
+  MON_OPTS="${MON_OPTS} -Dcom.wily.introscope.agentProfile=/var/${MON_HOME}/custom/${PROFILE_NAME}"
+  MON_OPTS="${MON_OPTS} -Dcom.wily.autoprobe.logSizeInKB=2000"
+  MON_OPTS="${MON_OPTS} -Dcom.wily.introscope.agent.agentName=${AGENT_NAME}"
+
+  JAVA_OPTS="${JAVA_OPTS} ${MON_OPTS}"
+fi

@@ -1,0 +1,12 @@
+#!/bin/sh
+#==========================================================
+# Middleware Variable file
+# Includes only variables that need to be used for other config files
+# Ex: ENV_NAME, HEAPDUMP_PATH, etc
+# You can use ${JVM_NAME} for ex: tomcatB
+#==========================================================
+export ENV_NAME="Default" # Valid values include Latest, Functional, Load, Staging, Production, DR, Training
+export APP_NAME="Default"
+export SUB_APP_NAME="Default"
+export HEAPDUMP_PATH="/net/wdw-imod-home.wdw.jpmc.com/ifs/wdw_home/home/middleware/dumps/${ENV_NAME}/${APP_NAME}/${HOSTNAME}"
+export GCLOG_PATH="/var/log/tomcatB"

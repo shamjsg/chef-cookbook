@@ -1,0 +1,35 @@
+{
+  "name": "app_ra_portal_webapi",
+  "description": "OpSheet Client Role",
+  "json_class": "Chef::Role",
+  "default_attributes": {
+    "applications": {
+      "nodejs": {
+        "wdpr-ra-portal-webapi": {
+          "friendly_name": "WDPR RA Portal Web API",
+          "dev_contact": "bob.fields@disney.com",
+          "test_uri": "/",
+          "se_contact": "steven.vantil@disney.com",
+          "script": "server.js",
+          "working_dir": "/src/api-server/",
+          "nodejsA_port": "8002",
+          "nodejsB_port": "9002",
+          "version": "",
+          "deployable": "",
+          "zdd": {
+            "nodejsA": "Dark",
+            "nodejsB": ""
+          }
+        }
+      }
+    }
+  },
+  "override_attributes": {
+  },
+  "chef_type": "role",
+  "run_list": [
+    "recipe[wdprt_se_nodejs]"
+  ],
+  "env_run_lists": {
+  }
+}

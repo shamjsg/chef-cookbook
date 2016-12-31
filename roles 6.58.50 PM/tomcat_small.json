@@ -1,0 +1,21 @@
+{
+  "name": "tomcat_small",
+  "description": "installs tomcat and apache",
+  "json_class": "Chef::Role",
+  "default_attributes": {
+    "middleware": {
+      "type": "tomcat"
+    }
+  },
+  "override_attributes": {
+
+  },
+  "chef_type": "role",
+  "run_list": [
+    "recipe[wdprt_tomcat_base::small]",
+    "recipe[wdprt_apache_base]"
+  ],
+  "env_run_lists": {
+
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "name": "app_payment_platform_core",
+  "description": "Adaptive Payment Platform",
+  "json_class": "Chef::Role",
+  "default_attributes": {
+    "mw_app_name": "payment-platform-core",
+    "java": {
+      "jdk_version": 8
+    },
+    "wdprt_tomcat_base": {
+      "tomcatA_major_version": "8",
+      "tomcatA_version": "8.0.22",
+      "tomcatB_major_version": "8",
+      "tomcatB_version": "8.0.22"
+      },
+    "zdd": {
+      "tomcatA": "Dark"
+    }
+  },
+  "override_attributes": {
+
+  },
+  "chef_type": "role",
+  "run_list": [
+  ],
+  "env_run_lists": {
+  }
+}

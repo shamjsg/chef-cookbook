@@ -1,0 +1,29 @@
+#!/bin/sh
+#==========================================================
+# JVM Config file
+# Includes java options for the JVM itself
+# Ex: Memory, heap dumps, verbose logging, etc
+# You can use ${JVM_NAME} for ex: tomcatA
+# Directories available: appconfig, applib, appssl
+#==========================================================
+
+JVM_OPTS="${JVM_OPTS} -Xms1024m"
+JVM_OPTS="${JVM_OPTS} -Xmx2048m"
+JVM_OPTS="${JVM_OPTS} -Xss256k"
+JVM_OPTS="${JVM_OPTS} -XX:MaxPermSize=256M"
+JVM_OPTS="${JVM_OPTS} -DTCAPP=${JVM_NAME}"
+JVM_OPTS="${JVM_OPTS} -Djava.net.preferIPv4Stack=true"
+JVM_OPTS="${JVM_OPTS} -Djava.awt.headless=true"
+JVM_OPTS="${JVM_OPTS} -XX:+HeapDumpOnOutOfMemoryError"
+JVM_OPTS="${JVM_OPTS} -XX:HeapDumpPath=${HEAPDUMP_PATH}/heap-dump_${JVM_NAME}_`date +%Y%m%d_%H%M`.hprof"
+JVM_OPTS="${JVM_OPTS} -XX:+PrintGCDetails"
+JVM_OPTS="${JVM_OPTS} -Xloggc:${GCLOG_PATH}/gclog.log"
+CATALINA_OPTS="${CATALINA_OPTS} -Dcom.sun.management.jmxremote"
+CATALINA_OPTS="${CATALINA_OPTS} -Dcom.sun.management.jmxremote.port=8100"
+CATALINA_OPTS="${CATALINA_OPTS} -Dcom.sun.management.jmxremote.ssl=false"
+CATALINA_OPTS="${CATALINA_OPTS} -Dcom.sun.management.jmxremote.authenticate=true"
+CATALINA_OPTS="${CATALINA_OPTS} -Dcom.sun.management.jmxremote.password.file=/opt/middleware/tomcat_config/tomcatA/jmxremote.password"
+CATALINA_OPTS="${CATALINA_OPTS} -Dcom.sun.management.jmxremote.access.file=/opt/middleware/tomcat_config/tomcatA/jmxremote.access"
+
+JAVA_OPTS="${JVM_OPTS}"
+CATALINA_OPTS="${CATALINA_OPTS}"

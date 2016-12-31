@@ -1,0 +1,17 @@
+###############################################################################
+# This file is modified by CHEF and is not to be modified by hand             #
+###############################################################################
+<% if node[:zdd][:tomcatA]=='Lit' -%>
+JVM_OPTS="${JVM_OPTS} -DMW_NAME=tomcatA"
+<% end -%>
+<% if node[:zdd][:tomcatB]=='Lit' -%>
+JVM_OPTS="${JVM_OPTS} -DMW_NAME=tomcatB"
+<% end -%>
+JVM_OPTS="${JVM_OPTS} -DMW_APP=<%= node['mw_app_name'] %>"
+JVM_OPTS="${JVM_OPTS} -DMW_ENV=<%= node.chef_environment%>"
+<% if node[:zdd][:tomcatA]=='Lit' -%>
+JVM_OPTS="${JVM_OPTS} -DMW_ZDD=<%= node['zdd']['tomcatA'] %>"
+<% end -%>
+<% if node[:zdd][:tomcatB]=='Lit' -%>
+JVM_OPTS="${JVM_OPTS} -DMW_ZDD=<%= node['zdd']['tomcatB'] %>"
+<% end -%>

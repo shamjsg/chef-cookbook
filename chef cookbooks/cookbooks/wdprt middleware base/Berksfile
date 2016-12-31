@@ -1,0 +1,6 @@
+source "https://supermarket.getchef.com"
+#source "http://berksapi.cloud.corp.dig.com"
+
+metadata
+cookbook 'ssh-keys', path: '../ssh-keys'
+cookbook 'sudo', path: '../sudo'

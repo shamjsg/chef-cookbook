@@ -1,0 +1,42 @@
+{
+  "name": "app_payment_platform_services",
+  "description": "Adaptive Payment Platform Services",
+  "json_class": "Chef::Role",
+  "default_attributes": {
+    "mw_app_name": "payment-platform-services",
+    "java": {
+      "jdk_version": 8
+    },
+    "wdprt_tomcat_base": {
+      "tomcatA_major_version": "8",
+      "tomcatA_version": "8.0.22",
+      "tomcatB_major_version": "8",
+      "tomcatB_version": "8.0.22"
+      },
+	"applications": {
+      "app-services": {
+        "nexus_group": "com.wdpr.payment",
+        "war_name": "adaptivepayment.war",
+        "friendly_name": "Payment Services",
+        "artifact_type": "war",
+        "version": "RELEASE",
+        "user": "tomcat",
+        "group": "tomcat",
+        "dev_contact": "Pavan.K.Myneni@disney.com",
+        "test_uri": "N/A",
+        "se_contact": "eric.t.tryon@disney.com, Anil.Kumar.X.Pantham.-ND@disney.com"
+      }
+	},
+    "zdd": {
+      "tomcatA": "Dark"
+    }
+  },
+  "override_attributes": {
+
+  },
+  "chef_type": "role",
+  "run_list": [
+  ],
+  "env_run_lists": {
+  }
+}

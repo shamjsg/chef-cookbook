@@ -1,0 +1,33 @@
+{
+  "name": "tomcat8",
+  "description": "Tomcat 8 - Remove before adding an app",
+  "json_class": "Chef::Role",
+  "default_attributes": {
+    "mw_app_name": "none",
+    "zdd": {
+      "tomcatA": "Dark"
+    },
+    "java": {
+      "jdk_version": 8
+    },
+    "wdprt_tomcat_base": {
+      "tomcatA_major_version": "8",
+      "tomcatA_version": "8.0.22",
+      "tomcatB_major_version": "8",
+      "tomcatB_version": "8.0.22"
+      }
+    },
+  "override_attributes": {
+
+  },
+  "chef_type": "role",
+  "run_list": [
+    "role[middleware_setup]",
+    "recipe[wdprt_yum_repos]",
+    "recipe[wdprt_yum_repos::dcs_epel]",
+    "recipe[wdprt_middleware_java]",
+    "recipe[wdprt_tomcat_base]",
+    "recipe[wdprt_tomcat_base::small]"
+  ],
+  "env_run_lists": { }
+}

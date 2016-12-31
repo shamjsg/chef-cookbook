@@ -1,0 +1,3 @@
+# Adding the ability for tomcat to restart apache - controled by chef
+Defaults:tomcat !requiretty
+tomcat ALL=NOPASSWD: /etc/init.d/httpd 

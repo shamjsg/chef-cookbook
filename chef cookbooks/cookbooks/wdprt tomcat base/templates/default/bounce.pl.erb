@@ -1,0 +1,122 @@
+#!/usr/bin/perl
+#VERSION=1.0.0
+##########################################################
+# bounce.pl
+#
+# Generic bounce script for tomcat
+#
+# @author	jayasham
+#
+# @version	1.0.0	05/27/2015	Created Script
+##########################################################
+
+###########################################
+# Uses
+###########################################
+
+use Term::ANSIColor qw(:constants);
+use File::Basename;
+use Getopt::Long;
+use Getopt::Std;
+use Cwd;
+use strict;
+use warnings;
+
+###########################################
+# Global Variables
+###########################################
+
+our $NAS = $ENV{'NAS'};
+if (-d "/net/cn-flor-nas01-idmz.jpmc.pvt/data/TPR/WDW/Vol360/mware/scripts") {
+        $NAS = "/net/cn-flor-nas01-idmz.jpmc.pvt/data/TPR/WDW/Vol360/mware";
+} elsif (-d "/net/cn-flor-nas02a-idmz.jpmc.pvt/wdw-mware/scripts") {
+        $NAS = "/net/cn-flor-nas02a-idmz.jpmc.pvt/wdw-mware";
+};
+my $TOOLS = $ENV{'TOOLS'};
+my $HOME = $ENV{'HOME'};
+
+chomp(my $HOSTNAME=`hostname -s`);
+$HOSTNAME = lc($HOSTNAME);
+(my $NODE_NUM=$HOSTNAME)=~s/[a-z]//g;
+
+chomp(my $DD = `date +%m%d%Y-%H%M%S`);
+chomp(my $OS = `uname`);
+chomp(my $WHOAMI = `whoami`);
+
+our $SCRIPT_PATH = dirname(__FILE__);
+if ("${SCRIPT_PATH}" !~ m/^\//) {
+	chomp($SCRIPT_PATH = `pwd`);
+}
+
+# MORE GLOBAL VARIABLES HERE
+
+##########################################
+# Main
+##########################################
+my $usage = 0;
+my $action = "";
+my $jvm = "";
+my $outageTime = 30;
+my $OID = "";
+
+# MORE OPTION VARIABLES HERE
+
+GetOptions (
+	'outageTime=i'			=> \$outageTime,
+	'jvm=s'				=> \$jvm,
+	'action=s'			=> \$action,
+	'usage|help|?'			=> \$usage);
+
+$action = lc($action);
+
+if ($usage == 1 || "${action}" !~ m/(start|stop|restart|kill|status)/ || "${jvm}" eq "") {
+	usage();
+}
+
+if ("${action}" =~ m/(stop|restart|kill)/) {
+	print "Putting server into outage for ${outageTime} minutes\n";
+	chomp($OID = `${NAS}/scripts/outage.pl -minutes ${outageTime} 2>/dev/null`);
+}
+
+# SCRIPT CONTENTS
+if ("${jvm}" eq "all") {
+	my @scripts = split(/\n/, `ls /etc/init.d/tomcat* 2>/dev/null`);
+	for my $script (@scripts) {
+		(my $indJVM = $script) =~ s/\/etc\/init.d\/tomcat//;
+		print "${action} ${indJVM}\n";
+		system("${script} ${action}");
+	}
+} elsif ("${jvm}" =~ m/(\d+)/) {
+	print "${action} ${jvm}\n";
+	system("/etc/init.d/tomcat${jvm} ${action}");
+} else {
+	my @scripts = split(/\n/, `ls /etc/init.d/tomcat${jvm}* 2>/dev/null`);
+	for my $script (@scripts) {
+		(my $indJVM = $script) =~ s/\/etc\/init.d\/tomcat//;
+		print "${action} ${indJVM}\n";
+		system("${script} ${action}");
+	}
+}
+
+if ("${action}" =~ m/(restart)/) {
+	system("${NAS}/scripts/outage.pl -remove ${OID} 2>/dev/null");
+}
+
+exit 0;
+
+#############################
+# Usage Statement
+#############################
+sub usage {
+	print <<"EOF";
+Usage: $0 [options]
+
+Options:
+	-jvm X				JVM to take action on. EX: A1, B2, A (for all A), all (for all JVMs)
+	-action X			stop, start, kill, restart, status
+	-usage|-help|-?			Prints this usage statement
+
+EOF
+	exit 1;
+}
+

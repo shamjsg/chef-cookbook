@@ -1,0 +1,270 @@
+#!/usr/bin/perl
+###########################################################
+# pids.pl
+#
+# This script is being used by every unix/linux server with multiple middleware products
+#  running on it.  It could also be used by scripts that need to get the pids of a system
+#  for whatever reason.
+#
+# DO NOT MODIFY THIS SCRIPT WITHOUT WORKING WITH EVERY MEMBER OF THE TEAM
+#
+#--------------------------------------------------------------------------------------
+# The key purpose of this script is to get a short list of important process related items
+#  to return to the screen in a quick and useful display.  Specifically, it will display
+#  the pids of each of the java processes that are running, the memory footprint, CPU usage
+#  and other similar items.
+#
+# The output is a guide made for quick analysis, you should use deeper and more appropiate
+#  troubleshooting techniques for issues that you find.
+#
+#--------------
+# VERSION=2.0.2
+#--------------
+#
+# CHANGE LOG
+#----------------------------------------------------------
+#
+# 02-02-15 - MP
+# new Ver=2.0.1
+# Script redone for use with new reference architecture
+#
+# 02-11-14 - MP
+# new Ver=2.0.2
+# -down command now works for multiple instances
+#
+###########################################################
+
+###########################################
+# Uses
+###########################################
+
+use Term::ANSIColor qw(:constants);
+use Term::ANSIColor qw(colored);
+use File::Basename;
+use Data::Dumper;
+use Getopt::Long;
+use POSIX qw(strftime);
+use strict;
+use warnings;
+
+###########################################
+# Global Variables
+###########################################
+our $NAS = $ENV{'NAS'};
+if (-d "/net/cn-flor-nas01-idmz.jpmc.pvt/data/TPR/WDW/Vol360/mware/scripts") {
+        $NAS = "/net/cn-flor-nas01-idmz.jpmc.pvt/data/TPR/WDW/Vol360/mware";
+} elsif (-d "/net/cn-flor-nas02a-idmz.jpmc.pvt/wdw-mware/scripts") {
+        $NAS = "/net/cn-flor-nas02a-idmz.jpmc.pvt/wdw-mware";
+};
+my $TOOLS = $ENV{'TOOLS'};
+my $HOME = $ENV{'HOME'};
+
+chomp(my $HOSTNAME=`hostname -s`);
+$HOSTNAME = lc($HOSTNAME);
+(my $NODE_NUM=$HOSTNAME)=~s/[a-z]//g;
+
+chomp(my $DD=`date +%m%d%Y-%H%M%S`);
+chomp(my $OS = `uname`);
+chomp(my $WHOAMI = `whoami`);
+
+our $SCRIPT_PATH = dirname(__FILE__);
+if ("${SCRIPT_PATH}" !~ m/^\//) {
+  chomp($SCRIPT_PATH = `pwd`);
+}
+
+# MORE GLOBAL VARIABLES HERE
+my $PROC_IDS = "tomcat|apache|mysql|rundeck";
+my $PROC_TYPES = "java|awbroker|mysqld";
+
+##########################################
+# Main
+##########################################
+my $usage = 0;
+my $extended = 0;
+my $down = 0;
+my $onlyDown = 0;
+my $exitOnDown = 0;
+
+GetOptions ('help|h|usage|?'	=> \$usage,
+  'extended'			=> \$extended,
+  'down|showDown'	=> \$down,
+  'onlyDown'			=> \$onlyDown,
+  'exitOnDown'		=> \$exitOnDown);
+
+if ($usage == 1) {
+  usage();
+}
+
+my $postProcess = "";
+
+# HTTP
+my $httpStatus = "";
+chomp(my $httpCount = `ps -ef |egrep -v "grep|vnc|httpdlite|lighttpd|teamquest" |grep -c httpd`);
+if ($onlyDown == 0) {
+  $httpStatus = "HTTP Servers:\t${httpCount}\n";
+  my $llawp_count=`ps -ef | grep LLAWP | grep -v grep | wc -l`;
+  chomp(my $llawp_pid=`ps -ef | grep LLAWP | grep -v grep | awk '{print \$2}'`);
+  if ( $httpCount == 0 && $llawp_count > 0 ) {
+    $httpStatus = "${httpStatus}*** HTTP is down, but there is an LLWAP process still running with PID ${llawp_pid}.  HTTPD will not start back up. ***\n";
+  }
+}
+
+# Operating System Specific Items
+my $searchHeaders = "";
+my $osVersion = "";
+my $freeMemory = "";
+my $cpuUsage = "";
+my $curTime = "";
+if ("${OS}" eq "SunOS") {
+  $searchHeaders="pid,ppid,ruser,start_time,etime,time,pcpu,vsz,rss,args,cmd";
+} elsif ("${OS}" eq "AIX") {
+  $searchHeaders="pid,ppid,ruser,start_time,etime,time,pcpu,vsz,rss,args,cmd";
+} elsif ("${OS}" eq "Linux") {
+  $searchHeaders="pid,ppid,ruser,start_time,etime,time,pcpu,vsz,rss,args,cmd";
+  chomp($osVersion = `cat /etc/redhat-release`);
+  $osVersion =~ s/Release:(\s+)(\S)(.*)/$2$3/;
+  chomp($freeMemory = `free -m | grep "Mem"`);
+  $freeMemory =~ s/Mem:(\s+)(\d+)(\s+)(\d+)(\s+)(\d+)(\s+)(\d+)(\s+)(\d+)(\s+)(\d+)/$4m out of $2m used/;
+  chomp($cpuUsage = `top -bn1 | grep "Cpu(s)" | cut -d',' -f1`);
+  $cpuUsage =~ s/Cpu\(s\):(\s+)(.*)us/$2 used/;
+  $curTime = strftime("%F %H:%M", localtime());
+}
+
+# Get processes
+chomp(my @ps=`/bin/ps -eo "${searchHeaders}" | egrep "${PROC_IDS}" | egrep "${PROC_TYPES}" | egrep -v "grep|fanthill"`);
+
+if ($onlyDown == 0) {
+  # Headers
+  if ($extended == 0) {
+    print "${httpStatus}";
+    print "\n";
+    print colored(sprintf("%7s  %16s  %9s  %12s  %5s  %10s  %12s\n",
+      "PID", "Start", "Owner", "Environment", "ZDD", "Container", "Application"), 'underscore');
+  } else {
+    print "Host:\t\t${HOSTNAME}\n";
+    print "OS:\t\t${OS}\n";
+    print "Version:\t${osVersion}\n";
+    print "CPU:\t\t${cpuUsage}\n";
+    print "Memory:\t\t${freeMemory}\n";
+    print "Current Date/Time:\t${curTime}\n";
+    print "\n";
+    print "${httpStatus}";
+    print "\n";
+    print colored(sprintf("%7s  %7s  %16s  %12s  %11s  %5s  %10s  %9s  %9s  %12s  %5s  %10s  %12s\n",
+      "PID", "PARENT", "Start",  "Elapsed", "CPUTime", "CPU\%", "VirtM(MB)", "ResM(MB)", "Owner", "Environment", "ZDD", "Container", "Application"), 'underscore');
+  }
+}
+
+my %upJVMs;
+
+# Each process
+for my $p (@ps) {
+  # Remove blank space at begining
+  $p =~ s/^\s*//;
+
+  # Separate line into separate sections
+  my @line = split(/\s+/, $p);
+
+  my $pid = $line[0];
+  my $ppid = $line[1];
+  my $owner = $line[2];
+  my $sTime = $line[3];
+  my $eTime = $line[4];
+  my $cTime = $line[5];
+  my $cPct = $line[6];
+  my $VSZkMem = $line[7];
+  my $RSSkMem = $line[8];
+  my $vszMb = $VSZkMem/1024;
+  my $rssMb = $RSSkMem/1024;
+  my $shortCmd = $line[9];
+  my $mw_name = "--";
+  my $mw_app = "--";
+  my $mw_env = "--";
+  my $mw_zdd = "--";
+  my $longCmd = "";
+  for (my $i = 10; $i < scalar @line; $i++) {
+    $longCmd = "${longCmd} $line[$i]";
+
+    if ("$line[$i]" =~ m/-DMW_NAME=/) {
+      ($mw_name = $line[$i]) =~ s/-DMW_NAME=(.*)/$1/;
+    } elsif ("$line[$i]" =~ m/-DMW_APP=/) {
+      ($mw_app = $line[$i]) =~ s/-DMW_APP=(.*)/$1/;
+    } elsif ("$line[$i]" =~ m/-DMW_ENV=/) {
+      ($mw_env = $line[$i]) =~ s/-DMW_ENV=(.*)/$1/;
+    } elsif ("$line[$i]" =~ m/-DMW_ZDD=/) {
+      ($mw_zdd = $line[$i]) =~ s/-DMW_ZDD=(.*)/$1/;
+    }
+  }
+
+  $sTime = (stat("/proc/${pid}"))[9];
+  $sTime = strftime("%F %H:%M", localtime($sTime));
+
+  my $color = "cyan";
+  if ("${mw_zdd}" =~ m/Lit/i) {
+    $color = "bold cyan";
+  }
+
+  if ($onlyDown == 0) {
+    if ($extended == 0) {
+      print colored(sprintf("%7s  %16s  %9s  %12s  %5s  %10s  %12s\n",
+        $pid, $sTime, $owner, $mw_env, $mw_zdd, $mw_name, $mw_app), $color);
+    } else {
+      print colored (sprintf("%7s  %7s  %16s  %12s  %11s  %5s  %10.1f  %9.1f  %9s  %12s  %5s  %10s  %12s\n",
+        $pid, $ppid, $sTime, $eTime, $cTime, $cPct, $vszMb, $rssMb, $owner, $mw_env, $mw_zdd, $mw_name, $mw_app), $color);
+    }
+  }
+
+  $upJVMs{$mw_name} = 1;
+}
+
+my $exit = 0;
+
+# Down section
+if ($down == 1 || $onlyDown == 1) {
+  print "\nProcesses that are currently down:\n";
+
+  my @allJVMs;
+
+  chomp(my $tomcatExists = `id tomcat 2>/dev/null | wc -l`);
+  if ($tomcatExists > 0) {
+    my @dirs = split(/\n/, `ls -d /usr/share/tomcat* 2>/dev/null`);
+    for my $dir (@dirs) {
+      $dir =~ s/(.*)\/(.*)/$2/;
+      my @instances = split(/\n/, `ls -d /opt/middleware/${dir}/*`);
+      for my $instance (@instances) {
+        $instance =~ s/(.*)\/(.*)/$2/;
+        push (@allJVMs, $instance);
+      }
+    }
+  }
+
+  for my $jvm (@allJVMs) {
+    if (!defined $upJVMs{$jvm} || $upJVMs{$jvm} != 1) {
+      print "\t${jvm}\n";
+      $exit = 1;
+    }
+  }
+}
+
+if ($exitOnDown == 1) {
+  exit $exit;
+}
+
+
+#############################
+# Usage Statement
+#############################
+sub usage {
+  print <<"EOF";
+Usage: $0 [options]
+
+Options:
+  -extended					Show extended informatino
+  -down|showDown			Show JVMs that are down
+  -onlyDown					Only show -down information
+  -exitOnDown				Exit 1 if JVMs are down
+  -usage|-help|-?			Prints this usage statement
+
+EOF
+  exit 1;
+}

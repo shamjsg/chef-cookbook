@@ -1,0 +1,93 @@
+# Get ZDD Status
+tomcatAstatus=`cat /opt/middleware/tomcatA/common/.zdd`;
+tomcatBstatus=`cat /opt/middleware/tomcatB/common/.zdd`;
+error=0;
+
+if [ $tomcatAstatus == "Lit" ]
+then
+A=1;
+while [ $A -le 4 ]
+do
+	if [ -d "/opt/middleware/tomcatA/tomcatA$A/conf/" ]
+	then
+		if [ -e "/opt/middleware/tomcatA/tomcatA$A/conf/.status" ]
+		then
+			JVMstatus=`cat "/opt/middleware/tomcatA/tomcatA$A/conf/.status"`;
+			if [ $JVMstatus != "Dark" ]
+			then
+				if ps -ef | grep tomcatA$A | grep -v grep > /dev/null;
+				then
+					echo "tomcatA$A is lit & running.";
+				else
+					echo "ERROR: tomcatA$A is lit but not running.";
+	 				error=1;
+				fi
+			else
+				echo "tomcatA$A is individually set to Dark";
+			fi
+		else
+			if ps -ef | grep tomcatA$A | grep -v grep > /dev/null;
+                	then
+                		echo "tomcatA$A is lit & running.";
+        	        else
+	                	echo "ERROR: tomcatA$A is lit but not running.";
+                		error=1;
+			fi
+		fi
+	else
+		echo "tomcatA$A does not exist."
+	fi 
+A=$((A+1));
+done
+else
+	echo "Tomcat A side is not Lit!";
+fi
+
+if [ $tomcatBstatus == "Lit" ]
+then
+B=1;
+while [ $B -le 4 ]
+do
+        if [ -d "/opt/middleware/tomcatB/tomcatB$B/conf/" ]
+        then
+                if [ -e "/opt/middleware/tomcatB/tomcatB$B/conf/.status" ]
+                then
+                        JVMstatus=`cat "/opt/middleware/tomcatB/tomcatB$B/conf/.status"`;
+                        if [ $JVMstatus != "Dark" ]
+                        then
+                                if ps -ef | grep tomcatB$B | grep -v grep > /dev/null;
+                                then
+                                        echo "tomcatB$B is lit & running.";
+                                else
+                                        echo "ERROR: tomcatB$B is lit but not running.";
+                                        error=1;
+                                fi
+                        else
+                                echo "tomcatB$B is individually set to Dark";
+                        fi
+                else
+                        if ps -ef | grep tomcatB$B | grep -v grep > /dev/null;
+                        then
+                                echo "tomcatB$B is lit & running.";
+                        else
+                                echo "ERROR: tomcatB$B is lit but not running.";
+                                error=1;
+                        fi
+                fi
+        else
+                echo "tomcatB$B does not exist."
+        fi
+B=$((B+1));	
+done
+else
+        echo "Tomcat B side is not Lit!";
+fi
+
+if [ $error == 1 ]
+then
+	echo "ERROR: Lit JVMs are not running!";
+	exit 1;
+else
+	echo "All Lit JVMs Running!";
+	exit 0;
+fi

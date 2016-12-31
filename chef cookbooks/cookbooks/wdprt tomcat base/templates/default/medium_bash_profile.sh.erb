@@ -1,0 +1,105 @@
+#!/bin/bash
+################################################################################
+# File Name:    .bash_profile                                                  #
+# File Author:  jaya sham (jayasham.x@jpmc.com)                                #
+# File Purpose: This is the profile for the tomcat user with the new           #
+#               RA (Refrence Articture) layout in mind                         #
+# File History: SDM  12/12/14  v1.0  This is the initial version of the tomcat #
+#                                    profile on the new RA servers             #
+################################################################################
+################################################################################
+# OS Configs                                                                   #
+################################################################################
+PATH=/usr/bin:/bin:/etc:.:/usr/local/bin:/usr/sbin:/opt/OV/bin/OpC:~/:/opt/middleware/Tools
+HN=`hostname -a`
+if [ -f ~/.bashrc ]; then
+  . ~/.bashrc
+fi
+PS1="\n\[\e[1;32m\][\D{%Y-%m-%d} \T]\[\e[1;30m\][\!]\n\[\e[1;35m\][\u]\[\e[1;34m\][\H]\[\e[1;36m\][\w]\[\e[0;37m\]\n\$ "
+if [[ -d /net/cn-flor-nas01-idmz.jpmc.pvt/data/TPR/WDW/Vol360/mware/scripts ]]; then
+        export NAS=/net/cn-flor-nas01-idmz.jpmc.pvt/data/TPR/WDW/Vol360/mware
+elif [[ -d /net/cn-flor-nas02a-idmz.jpmc.pvt/wdw-mware/scripts ]]; then
+        export NAS=/net/cn-flor-nas02a-idmz.jpmc.pvt/wdw-mware
+else
+        export NAS="DOES_NOT_EXIST";
+fi
+MAIL=/usr/mail/${LOGNAME:?}
+EDITOR=vi
+ulimit -d unlimited
+umask 022
+export MAIL EDITOR HN PATH PS1 NAS
+################################################################################
+# End of OS Configs                                                            #
+################################################################################
+
+################################################################################
+# Sudo audit trail                                                             #
+################################################################################
+USER=`(/usr/bin/whoami | awk '{print $1}')`
+HISTDIR="${HOME}/.sh_histories"
+if [[ ! -d ${HISTDIR} ]] ; then
+  mkdir ${HISTDIR}
+  chmod 700 ${HISTDIR}
+fi
+
+HISTFILE="${HISTDIR}/${USER}.sh_history"
+if [[ ! -w ${HISTFILE} ]] ; then
+  touch ${HISTFILE}
+  chmod 600 ${HISTFILE}
+fi
+
+export HISTDIR HISTFILE
+################################################################################
+# End of Sudo audit trail                                                      #
+################################################################################
+
+################################################################################
+# Alias Commands                                                               #
+################################################################################
+alias startA1="/etc/init.d/tomcatA1 start"
+alias stopA1="/etc/init.d/tomcatA1 stop"
+alias killA1="/etc/init.d/tomcatA1 kill"
+alias restartA1="/etc/init.d/tomcatA1 restart"
+alias statusA1="/etc/init.d/tomcatA1 status"
+alias startA2="/etc/init.d/tomcatA2 start"
+alias stopA2="/etc/init.d/tomcatA2 stop"
+alias killA2="/etc/init.d/tomcatA2 kill"
+alias restartA2="/etc/init.d/tomcatA2 restart"
+alias statusA2="/etc/init.d/tomcatA2 status"
+alias stopallA="/etc/init.d/tomcatA1 stop; /etc/init.d/tomcatA2 stop"
+alias startallA="/etc/init.d/tomcatA1 start; /etc/init.d/tomcatA2 start"
+alias restartallA="/etc/init.d/tomcatA1 restart; /etc/init.d/tomcatA2 restart"
+alias startB1="/etc/init.d/tomcatB1 start"
+alias stopB1="/etc/init.d/tomcatB1 stop"
+alias killB1="/etc/init.d/tomcatB1 kill"
+alias restartB1="/etc/init.d/tomcatB1 restart"
+alias statusB1="/etc/init.d/tomcatB1 status"
+alias startB2="/etc/init.d/tomcatB2 start"
+alias stopB2="/etc/init.d/tomcatB2 stop"
+alias killB2="/etc/init.d/tomcatB2 kill"
+alias restartB2="/etc/init.d/tomcatB2 restart"
+alias statusB2="/etc/init.d/tomcatB2 status"
+alias stopallB="/etc/init.d/tomcatB1 stop; /etc/init.d/tomcatB2 stop"
+alias startallB="/etc/init.d/tomcatB1 start; /etc/init.d/tomcatB2 start"
+alias restartallB="/etc/init.d/tomcatB1 restart; /etc/init.d/tomcatB2 restart"
+alias pids="/opt/middleware/Tools/pids.pl"
+alias WebStop="sudo /etc/init.d/httpd stop"
+alias WebStart="sudo /etc/init.d/httpd start"
+alias WebRestart="sudo /etc/init.d/httpd restart"
+
+################################################################################
+# End of Alias Commands                                                        #
+################################################################################
+
+################################################################################
+# Source system specific files                                                 #
+################################################################################
+if [ -e ${HOME}/.custom.env ]; then
+  . ${HOME}/.custom.env
+fi
+if [ -e ${HOME}/.custom.alias ]; then
+  . ${HOME}/.custom.alias
+fi
+################################################################################
+# End Source system specific files                                             #
+################################################################################

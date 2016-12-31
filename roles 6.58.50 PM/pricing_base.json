@@ -1,0 +1,41 @@
+{
+  "name": "pricing_base",
+  "description": "Pricing Base Role",
+  "json_class": "Chef::Role",
+  "default_attributes": {
+    "mw_app_name": "pricing",
+    "java": {
+      "jdk_version": 7
+    },
+    "zdd": {
+      "tomcatA": "Dark"
+    },
+    "applications": {
+      "pricing-webservice": {
+        "nexus_group": "com.wdpr.productservices.pricing",
+        "war_name": "pricing-webservice.war",
+        "friendly_name": "Pricing Service",
+        "artifact_type": "war",
+        "version": "RELEASE",
+        "user": "tomcat",
+        "group": "tomcat",
+        "dev_contact": "roberto.e.garcia@disney.com",
+        "test_uri": "Blank - Please correct in Roles",
+        "se_contact": "james.carter@disney.com"
+      }
+    },
+    "wdprt_mq_base": {
+      "app_alias": "PRICE"
+    }
+  },
+  "override_attributes": {
+
+  },
+  "chef_type": "role",
+  "run_list": [
+    "recipe[app_pricing]"
+  ],
+  "env_run_lists": {
+
+  }
+}

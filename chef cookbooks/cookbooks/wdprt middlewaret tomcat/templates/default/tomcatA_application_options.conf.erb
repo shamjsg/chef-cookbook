@@ -1,0 +1,14 @@
+#!/bin/sh
+#==========================================================
+# Application Config file
+# Includes java options specific to the application
+# Ex: Classpath, custom properties, WAS_APP, etc
+# You can use ${JVM_NAME} for ex: tomcatA
+# Directories available: /opt/middleware/applications/tomcatA/(config, lib, ssl)
+#==========================================================
+APP_CLASSPATH=""
+APP_JVM_OPTS=""
+APP_LIB_PATH=""
+
+CLASSPATH="${CLASSPATH}:${APP_CLASSPATH}"
+JAVA_OPTS="${JAVA_OPTS} ${APP_JVM_OPTS} ${APP_LIB_PATH}"

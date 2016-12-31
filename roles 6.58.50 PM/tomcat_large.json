@@ -1,0 +1,21 @@
+{
+  "name": "tomcat_large",
+  "description": "runs tomcat-large and apache recipes",
+  "json_class": "Chef::Role",
+  "default_attributes": {
+    "middleware": {
+      "type": "tomcat"
+    }
+  },
+  "override_attributes": {
+
+  },
+  "chef_type": "role",
+  "run_list": [
+    "recipe[wdprt_tomcat_base::large]",
+    "recipe[wdprt_apache_base]"
+  ],
+  "env_run_lists": {
+
+  }
+}

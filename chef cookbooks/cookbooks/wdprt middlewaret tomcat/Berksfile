@@ -1,0 +1,4 @@
+source "https://supermarket.getchef.com"
+
+metadata
+cookbook 'wdprt_middleware_java', path: '../wdprt_middleware_java'
